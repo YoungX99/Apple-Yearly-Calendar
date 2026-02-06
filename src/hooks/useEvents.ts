@@ -36,33 +36,42 @@ export function useEvents() {
   // Write events to file if connected (fire-and-forget with error catch)
   const writeToFile = useCallback((evts: CalendarEvent[]) => {
     if (fileHandleRef.current) {
-      writeFileHandle(fileHandleRef.current, evts).catch((err) => {
+      writeFileHandle(fileHandleRef.current, evts).catch(err => {
         console.error('Failed to write to file:', err)
       })
     }
   }, [])
 
   // Persist helper: always write localStorage, then file if connected
-  const persist = useCallback((evts: CalendarEvent[]) => {
-    saveToLocalStorage(evts)
-    writeToFile(evts)
-  }, [writeToFile])
+  const persist = useCallback(
+    (evts: CalendarEvent[]) => {
+      saveToLocalStorage(evts)
+      writeToFile(evts)
+    },
+    [writeToFile],
+  )
 
-  const addEvent = useCallback((event: Omit<CalendarEvent, 'id'>) => {
-    setEvents(prev => {
-      const next = [...prev, { ...event, id: Date.now() }]
-      persist(next)
-      return next
-    })
-  }, [persist])
+  const addEvent = useCallback(
+    (event: Omit<CalendarEvent, 'id'>) => {
+      setEvents(prev => {
+        const next = [...prev, { ...event, id: Date.now() }]
+        persist(next)
+        return next
+      })
+    },
+    [persist],
+  )
 
-  const deleteEvent = useCallback((id: number) => {
-    setEvents(prev => {
-      const next = prev.filter(e => e.id !== id)
-      persist(next)
-      return next
-    })
-  }, [persist])
+  const deleteEvent = useCallback(
+    (id: number) => {
+      setEvents(prev => {
+        const next = prev.filter(e => e.id !== id)
+        persist(next)
+        return next
+      })
+    },
+    [persist],
+  )
 
   // Connect to an existing JSON file
   const connectFile = useCallback(async () => {
@@ -132,7 +141,9 @@ export function useEvents() {
       }
     })()
 
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [fsSupported])
 
   return {

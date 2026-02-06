@@ -6,17 +6,8 @@ import EventModal from './components/EventModal'
 import { useEvents } from './hooks/useEvents'
 
 export default function App() {
-  const {
-    events,
-    addEvent,
-    deleteEvent,
-    storageMode,
-    fileName,
-    fsSupported,
-    connectFile,
-    createFile,
-    disconnectFile,
-  } = useEvents()
+  const { events, addEvent, deleteEvent, storageMode, fileName, fsSupported, connectFile, createFile, disconnectFile } =
+    useEvents()
   const [modalOpen, setModalOpen] = useState(false)
   const calendarRef = useRef<HTMLDivElement>(null)
 
@@ -43,11 +34,7 @@ export default function App() {
         onCreateFile={createFile}
         onDisconnectFile={disconnectFile}
       />
-      <EventModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={addEvent}
-      />
+      <EventModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSubmit={addEvent} />
     </div>
   )
 }

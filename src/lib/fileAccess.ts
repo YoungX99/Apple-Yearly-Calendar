@@ -69,7 +69,10 @@ export async function writeFileHandle(handle: FileSystemFileHandle, events: Cale
   await writable.close()
 }
 
-export async function verifyPermission(handle: FileSystemFileHandle, mode: 'read' | 'readwrite' = 'readwrite'): Promise<boolean> {
+export async function verifyPermission(
+  handle: FileSystemFileHandle,
+  mode: 'read' | 'readwrite' = 'readwrite',
+): Promise<boolean> {
   const opts = { mode }
   if ((await handle.queryPermission(opts)) === 'granted') {
     return true

@@ -7,7 +7,14 @@ interface FooterProps {
   onDisconnectFile: () => void
 }
 
-export default function Footer({ storageMode, fileName, fsSupported, onConnectFile, onCreateFile, onDisconnectFile }: FooterProps) {
+export default function Footer({
+  storageMode,
+  fileName,
+  fsSupported,
+  onConnectFile,
+  onCreateFile,
+  onDisconnectFile,
+}: FooterProps) {
   return (
     <footer className="h-8 border-t border-ios-border bg-ios-bg text-xs text-gray-500 flex items-center justify-between px-6 z-40">
       <span>

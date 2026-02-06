@@ -46,7 +46,7 @@ export default function MonthRow({ monthName, monthIndex, events, onDeleteEvent 
         key={day}
         className={cellClasses}
         id={YEAR === currentYear && monthIndex === currentMonth && day === currentDay ? 'cell-today' : undefined}
-      />
+      />,
     )
   }
 
@@ -58,7 +58,14 @@ export default function MonthRow({ monthName, monthIndex, events, onDeleteEvent 
       {dayCells}
       <div className="absolute inset-0 pointer-events-none top-4 bottom-1">
         {relevantEvents.map((evt, idx) => (
-          <EventBar key={evt.id} event={evt} monthIndex={monthIndex} daysInMonth={daysInMonth} stackIndex={idx} onDelete={onDeleteEvent} />
+          <EventBar
+            key={evt.id}
+            event={evt}
+            monthIndex={monthIndex}
+            daysInMonth={daysInMonth}
+            stackIndex={idx}
+            onDelete={onDeleteEvent}
+          />
         ))}
       </div>
     </div>

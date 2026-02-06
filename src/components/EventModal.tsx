@@ -52,7 +52,9 @@ export default function EventModal({ isOpen, onClose, onSubmit }: EventModalProp
       className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center transition-opacity duration-200 ${visible ? 'opacity-100' : 'opacity-0'}`}
       onClick={handleBackdropClick}
     >
-      <div className={`bg-white rounded-xl shadow-2xl w-[400px] overflow-hidden transform transition-transform duration-200 ${visible ? 'scale-100' : 'scale-95'}`}>
+      <div
+        className={`bg-white rounded-xl shadow-2xl w-[400px] overflow-hidden transform transition-transform duration-200 ${visible ? 'scale-100' : 'scale-95'}`}
+      >
         <div className="px-4 py-3 border-b border-ios-border flex justify-between items-center bg-gray-50/50">
           <h3 className="text-sm font-semibold text-gray-900">New Event</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -110,17 +112,26 @@ export default function EventModal({ isOpen, onClose, onSubmit }: EventModalProp
                     onChange={() => setColor(c.name)}
                     className="peer sr-only"
                   />
-                  <div className={`w-6 h-6 rounded-full ${c.hex} peer-checked:ring-2 peer-checked:ring-offset-2 peer-checked:ring-gray-400 hover:opacity-80 transition`} />
+                  <div
+                    className={`w-6 h-6 rounded-full ${c.hex} peer-checked:ring-2 peer-checked:ring-offset-2 peer-checked:ring-gray-400 hover:opacity-80 transition`}
+                  />
                 </label>
               ))}
             </div>
           </div>
 
           <div className="pt-4 flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md transition">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md transition"
+            >
               Cancel
             </button>
-            <button type="submit" className="px-4 py-1.5 text-sm font-medium text-white bg-gray-900 hover:bg-black rounded-md shadow-sm transition">
+            <button
+              type="submit"
+              className="px-4 py-1.5 text-sm font-medium text-white bg-gray-900 hover:bg-black rounded-md shadow-sm transition"
+            >
               Add Event
             </button>
           </div>

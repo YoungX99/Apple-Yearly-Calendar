@@ -29,7 +29,13 @@ const CalendarGrid = forwardRef<HTMLDivElement, CalendarGridProps>(({ events, on
       {/* Scrollable Months Grid */}
       <div className="min-w-max pb-10">
         {MONTHS.map((monthName, idx) => (
-          <MonthRow key={monthName} monthName={monthName} monthIndex={idx} events={events} onDeleteEvent={onDeleteEvent} />
+          <MonthRow
+            key={monthName}
+            monthName={monthName}
+            monthIndex={idx}
+            events={events}
+            onDeleteEvent={onDeleteEvent}
+          />
         ))}
       </div>
     </main>

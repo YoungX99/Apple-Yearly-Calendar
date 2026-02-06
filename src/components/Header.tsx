@@ -30,7 +30,9 @@ export default function Header({ onTodayClick, onAddEvent }: HeaderProps) {
         <button className="px-4 py-1 text-sm text-gray-500 rounded hover:text-gray-900 transition">Day</button>
         <button className="px-4 py-1 text-sm text-gray-500 rounded hover:text-gray-900 transition">Week</button>
         <button className="px-4 py-1 text-sm text-gray-500 rounded hover:text-gray-900 transition">Month</button>
-        <button className="px-4 py-1 text-sm font-semibold bg-white shadow-sm rounded text-gray-900 transition">Year</button>
+        <button className="px-4 py-1 text-sm font-semibold bg-white shadow-sm rounded text-gray-900 transition">
+          Year
+        </button>
       </div>
 
       <div className="flex items-center gap-4">
