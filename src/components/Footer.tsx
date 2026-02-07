@@ -5,6 +5,7 @@ interface FooterProps {
   onConnectFile: () => void
   onCreateFile: () => void
   onDisconnectFile: () => void
+  onDownloadEvents: () => void
 }
 
 export default function Footer({
@@ -14,6 +15,7 @@ export default function Footer({
   onConnectFile,
   onCreateFile,
   onDisconnectFile,
+  onDownloadEvents,
 }: FooterProps) {
   return (
     <footer className="h-8 border-t border-ios-border bg-ios-bg text-xs text-gray-500 flex items-center justify-between px-6 z-40">
@@ -28,6 +30,9 @@ export default function Footer({
         )}
       </span>
       <div className="flex gap-4 items-center">
+        <button className="hover:text-gray-800 transition-colors" onClick={onDownloadEvents}>
+          Download JSON
+        </button>
         {storageMode === 'file' ? (
           <button className="hover:text-gray-800 transition-colors" onClick={onDisconnectFile}>
             Disconnect

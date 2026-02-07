@@ -11,6 +11,7 @@ import {
   saveHandleToDB,
   loadHandleFromDB,
   clearHandleFromDB,
+  downloadEventsAsJson,
 } from '../lib/fileAccess'
 
 type StorageMode = 'localStorage' | 'file'
@@ -31,25 +32,24 @@ export function useEvents() {
   const [storageMode, setStorageMode] = useState<StorageMode>('localStorage')
   const [fileName, setFileName] = useState<string>('')
   const fileHandleRef = useRef<FileSystemFileHandle | null>(null)
+  const storageModeRef = useRef<StorageMode>('localStorage')
   const fsSupported = isFileSystemAccessSupported()
 
-  // Write events to file if connected (fire-and-forget with error catch)
-  const writeToFile = useCallback((evts: CalendarEvent[]) => {
-    if (fileHandleRef.current) {
+  const updateMode = useCallback((mode: StorageMode) => {
+    storageModeRef.current = mode
+    setStorageMode(mode)
+  }, [])
+
+  // Persist helper: mode-exclusive — file OR localStorage, never both
+  const persist = useCallback((evts: CalendarEvent[]) => {
+    if (storageModeRef.current === 'file' && fileHandleRef.current) {
       writeFileHandle(fileHandleRef.current, evts).catch(err => {
         console.error('Failed to write to file:', err)
       })
+    } else {
+      saveToLocalStorage(evts)
     }
   }, [])
-
-  // Persist helper: always write localStorage, then file if connected
-  const persist = useCallback(
-    (evts: CalendarEvent[]) => {
-      saveToLocalStorage(evts)
-      writeToFile(evts)
-    },
-    [writeToFile],
-  )
 
   const addEvent = useCallback(
     (event: Omit<CalendarEvent, 'id'>) => {
@@ -83,15 +83,14 @@ export function useEvents() {
     try {
       const fileEvents = await readFileHandle(handle)
       fileHandleRef.current = handle
-      setStorageMode('file')
+      updateMode('file')
       setFileName(handle.name)
       setEvents(fileEvents)
-      saveToLocalStorage(fileEvents)
       await saveHandleToDB(handle)
     } catch (err) {
       console.error('Failed to read file:', err)
     }
-  }, [])
+  }, [updateMode])
 
   // Create a new JSON file and write current events to it
   const createFile = useCallback(async () => {
@@ -101,21 +100,30 @@ export function useEvents() {
     try {
       await writeFileHandle(handle, events)
       fileHandleRef.current = handle
-      setStorageMode('file')
+      updateMode('file')
       setFileName(handle.name)
       await saveHandleToDB(handle)
     } catch (err) {
       console.error('Failed to create file:', err)
     }
-  }, [events])
+  }, [events, updateMode])
 
-  // Disconnect from file, revert to localStorage mode
+  // Disconnect from file, safely save to localStorage first
   const disconnectFile = useCallback(async () => {
+    setEvents(current => {
+      saveToLocalStorage(current)
+      return current
+    })
     fileHandleRef.current = null
-    setStorageMode('localStorage')
+    updateMode('localStorage')
     setFileName('')
     await clearHandleFromDB().catch(() => {})
-  }, [])
+  }, [updateMode])
+
+  // Download events as JSON (works in any mode)
+  const downloadEvents = useCallback(() => {
+    downloadEventsAsJson(events)
+  }, [events])
 
   // On mount: try to restore file handle from IndexedDB
   useEffect(() => {
@@ -132,10 +140,9 @@ export function useEvents() {
         if (cancelled) return
 
         fileHandleRef.current = handle
-        setStorageMode('file')
+        updateMode('file')
         setFileName(handle.name)
         setEvents(fileEvents)
-        saveToLocalStorage(fileEvents)
       } catch {
         // Silent fallback to localStorage
       }
@@ -144,7 +151,7 @@ export function useEvents() {
     return () => {
       cancelled = true
     }
-  }, [fsSupported])
+  }, [fsSupported, updateMode])
 
   return {
     events,
@@ -156,5 +163,6 @@ export function useEvents() {
     connectFile,
     createFile,
     disconnectFile,
+    downloadEvents,
   }
 }

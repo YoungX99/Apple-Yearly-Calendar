@@ -128,3 +128,19 @@ export async function clearHandleFromDB(): Promise<void> {
     tx.onerror = () => reject(tx.error)
   })
 }
+
+export function downloadEventsAsJson(events: CalendarEvent[]): void {
+  const data: CalendarFile = {
+    version: 1,
+    app: 'yearly-calendar',
+    lastModified: new Date().toISOString(),
+    events,
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'calendar-2026.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
