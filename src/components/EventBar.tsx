@@ -1,36 +1,49 @@
 import { useState, useRef, useEffect } from 'react'
 import type { CalendarEvent } from '../types'
-import { COLOR_MAP } from '../constants'
+import { COLOR_MAP, COLOR_DOT_MAP } from '../constants'
 
 interface EventBarProps {
   event: CalendarEvent
   monthIndex: number
   daysInMonth: number
-  stackIndex: number
+  slot: number
+  startDay: number
+  endDay: number
+  startsInMonth: boolean
+  endsInMonth: boolean
   onDelete: (id: number) => void
 }
 
-export default function EventBar({ event, monthIndex, daysInMonth, stackIndex, onDelete }: EventBarProps) {
+export default function EventBar({
+  event,
+  slot,
+  startDay,
+  endDay,
+  startsInMonth,
+  endsInMonth,
+  onDelete,
+}: EventBarProps) {
   const [showPopover, setShowPopover] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
 
-  const startDate = new Date(event.start)
-  const endDate = new Date(event.end)
-
-  let startDay = 1
-  if (startDate.getMonth() === monthIndex) {
-    startDay = startDate.getDate()
-  }
-
-  let endDay = daysInMonth
-  if (endDate.getMonth() === monthIndex) {
-    endDay = endDate.getDate()
-  }
-
   const duration = endDay - startDay + 1
-  const leftCalc = `calc(80px + ((100% - 80px) / 31 * ${startDay - 1}) + 2px)`
-  const widthCalc = `calc(((100% - 80px) / 31 * ${duration}) - 5px)`
-  const topOffset = 10 + stackIndex * 28
+  const leftGap = startsInMonth ? 2 : 0
+  const rightGap = endsInMonth ? 3 : 0
+  const leftCalc = `calc(80px + ((100% - 80px) / 31 * ${startDay - 1}) + ${leftGap}px)`
+  const widthCalc = `calc(((100% - 80px) / 31 * ${duration}) - ${leftGap + rightGap}px)`
+  const topOffset = (slot - 1) * 28 + 18
+
+  // Border radius based on cross-month position
+  let roundedClass: string
+  if (startsInMonth && endsInMonth) {
+    roundedClass = 'rounded'
+  } else if (startsInMonth) {
+    roundedClass = 'rounded-l'
+  } else if (endsInMonth) {
+    roundedClass = 'rounded-r'
+  } else {
+    roundedClass = ''
+  }
 
   // Close popover when clicking outside
   useEffect(() => {
@@ -43,8 +56,6 @@ export default function EventBar({ event, monthIndex, daysInMonth, stackIndex, o
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showPopover])
-
-  if (topOffset >= 70) return null
 
   const theme = COLOR_MAP[event.color] || COLOR_MAP['gray']
 
@@ -61,11 +72,11 @@ export default function EventBar({ event, monthIndex, daysInMonth, stackIndex, o
     }
   }
 
-  const colorDot = `bg-${event.color}-500`
+  const colorDot = COLOR_DOT_MAP[event.color] || COLOR_DOT_MAP['gray']
 
   return (
     <div
-      className={`absolute h-6 rounded px-2 text-[10px] font-bold flex items-center truncate border pointer-events-auto cursor-pointer shadow-sm event-bar ${theme}`}
+      className={`absolute h-6 ${roundedClass} px-2 text-[10px] font-bold flex items-center truncate border pointer-events-auto cursor-pointer shadow-sm event-bar ${theme}`}
       style={{ left: leftCalc, width: widthCalc, top: `${topOffset}px` }}
       title={`${event.title} (${event.start} to ${event.end})`}
       onClick={handleBarClick}

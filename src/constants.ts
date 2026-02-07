@@ -20,6 +20,16 @@ export const DEFAULT_EVENTS: CalendarEvent[] = [
   { id: 3, title: 'Conference', start: '2026-08-15', end: '2026-08-15', color: 'purple' },
 ]
 
+export const COLOR_DOT_MAP: Record<string, string> = {
+  red: 'bg-red-500',
+  orange: 'bg-orange-500',
+  yellow: 'bg-yellow-400',
+  green: 'bg-green-500',
+  blue: 'bg-blue-500',
+  purple: 'bg-purple-500',
+  gray: 'bg-gray-500',
+}
+
 export const COLOR_MAP: Record<string, string> = {
   red: 'bg-red-200 text-red-800 border-red-300',
   blue: 'bg-blue-200 text-blue-800 border-blue-300',

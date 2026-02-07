@@ -1,6 +1,9 @@
+import { useState, useMemo } from 'react'
 import type { CalendarEvent } from '../types'
 import { YEAR } from '../constants'
+import { computeMonthLayout } from '../lib/eventLayout'
 import EventBar from './EventBar'
+import DayDetailPopover from './DayDetailPopover'
 
 interface MonthRowProps {
   monthName: string
@@ -16,11 +19,17 @@ export default function MonthRow({ monthName, monthIndex, events, onDeleteEvent 
   const currentMonth = today.getMonth()
   const currentDay = today.getDate()
 
-  const relevantEvents = events.filter(e => {
-    const s = new Date(e.start)
-    const end = new Date(e.end)
-    return s.getFullYear() === YEAR && s.getMonth() <= monthIndex && end.getMonth() >= monthIndex
-  })
+  const [activeDay, setActiveDay] = useState<number | null>(null)
+
+  const layout = useMemo(
+    () => computeMonthLayout(events, monthIndex, YEAR),
+    [events, monthIndex],
+  )
+
+  const eventMap = useMemo(
+    () => new Map(events.map(e => [e.id, e])),
+    [events],
+  )
 
   const dayCells = []
   for (let day = 1; day <= 31; day++) {
@@ -41,12 +50,24 @@ export default function MonthRow({ monthName, monthIndex, events, onDeleteEvent 
       }
     }
 
+    const isValidDay = day <= daysInMonth
+    const overflowCount = layout.overflowCounts.get(day) || 0
+    const hasEvents = (layout.dayEvents.get(day)?.length || 0) > 0
+
     dayCells.push(
       <div
         key={day}
         className={cellClasses}
         id={YEAR === currentYear && monthIndex === currentMonth && day === currentDay ? 'cell-today' : undefined}
-      />,
+        onClick={isValidDay && hasEvents ? () => setActiveDay(day) : undefined}
+        style={isValidDay && hasEvents ? { cursor: 'pointer' } : undefined}
+      >
+        {isValidDay && overflowCount > 0 && (
+          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-gray-500 pointer-events-none select-none">
+            +{overflowCount}
+          </span>
+        )}
+      </div>,
     )
   }
 
@@ -57,17 +78,34 @@ export default function MonthRow({ monthName, monthIndex, events, onDeleteEvent 
       </div>
       {dayCells}
       <div className="absolute inset-0 pointer-events-none top-4 bottom-1">
-        {relevantEvents.map((evt, idx) => (
-          <EventBar
-            key={evt.id}
-            event={evt}
-            monthIndex={monthIndex}
-            daysInMonth={daysInMonth}
-            stackIndex={idx}
-            onDelete={onDeleteEvent}
-          />
-        ))}
+        {layout.eventLayouts.map(info => {
+          const evt = eventMap.get(info.eventId)
+          if (!evt) return null
+          return (
+            <EventBar
+              key={info.eventId}
+              event={evt}
+              monthIndex={monthIndex}
+              daysInMonth={daysInMonth}
+              slot={info.slot}
+              startDay={info.startDay}
+              endDay={info.endDay}
+              startsInMonth={info.startsInMonth}
+              endsInMonth={info.endsInMonth}
+              onDelete={onDeleteEvent}
+            />
+          )
+        })}
       </div>
+      {activeDay !== null && (
+        <DayDetailPopover
+          day={activeDay}
+          monthIndex={monthIndex}
+          events={layout.dayEvents.get(activeDay) ?? []}
+          onDelete={onDeleteEvent}
+          onClose={() => setActiveDay(null)}
+        />
+      )}
     </div>
   )
 }
