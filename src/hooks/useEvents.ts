@@ -73,6 +73,17 @@ export function useEvents() {
     [persist],
   )
 
+  const updateEvent = useCallback(
+    (id: number, data: Omit<CalendarEvent, 'id'>) => {
+      setEvents(prev => {
+        const next = prev.map(e => (e.id === id ? { ...data, id } : e))
+        persist(next)
+        return next
+      })
+    },
+    [persist],
+  )
+
   // Connect to an existing JSON file
   const connectFile = useCallback(async () => {
     const handle = await openJsonFile()
@@ -157,6 +168,7 @@ export function useEvents() {
     events,
     addEvent,
     deleteEvent,
+    updateEvent,
     storageMode,
     fileName,
     fsSupported,

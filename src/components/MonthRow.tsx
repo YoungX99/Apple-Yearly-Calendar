@@ -10,9 +10,10 @@ interface MonthRowProps {
   monthIndex: number
   events: CalendarEvent[]
   onDeleteEvent: (id: number) => void
+  onEditEvent: (event: CalendarEvent) => void
 }
 
-export default function MonthRow({ monthName, monthIndex, events, onDeleteEvent }: MonthRowProps) {
+export default function MonthRow({ monthName, monthIndex, events, onDeleteEvent, onEditEvent }: MonthRowProps) {
   const daysInMonth = new Date(YEAR, monthIndex + 1, 0).getDate()
   const today = new Date()
   const currentYear = today.getFullYear()
@@ -92,7 +93,7 @@ export default function MonthRow({ monthName, monthIndex, events, onDeleteEvent 
               endDay={info.endDay}
               startsInMonth={info.startsInMonth}
               endsInMonth={info.endsInMonth}
-              onDelete={onDeleteEvent}
+              onEdit={onEditEvent}
             />
           )
         })}

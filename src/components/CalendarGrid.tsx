@@ -6,9 +6,10 @@ import MonthRow from './MonthRow'
 interface CalendarGridProps {
   events: CalendarEvent[]
   onDeleteEvent: (id: number) => void
+  onEditEvent: (event: CalendarEvent) => void
 }
 
-const CalendarGrid = forwardRef<HTMLDivElement, CalendarGridProps>(({ events, onDeleteEvent }, ref) => {
+const CalendarGrid = forwardRef<HTMLDivElement, CalendarGridProps>(({ events, onDeleteEvent, onEditEvent }, ref) => {
   return (
     <main className="flex-1 overflow-auto relative flex flex-col no-scrollbar" ref={ref}>
       {/* Sticky Day Numbers Header */}
@@ -35,6 +36,7 @@ const CalendarGrid = forwardRef<HTMLDivElement, CalendarGridProps>(({ events, on
             monthIndex={idx}
             events={events}
             onDeleteEvent={onDeleteEvent}
+            onEditEvent={onEditEvent}
           />
         ))}
       </div>

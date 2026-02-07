@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
 import type { CalendarEvent } from '../types'
 import { MONTHS, YEAR, COLOR_DOT_MAP } from '../constants'
+import { useDeleteEvent } from '../hooks/useDeleteEvent'
 
 interface DayDetailPopoverProps {
   day: number
@@ -12,6 +13,7 @@ interface DayDetailPopoverProps {
 
 export default function DayDetailPopover({ day, monthIndex, events, onDelete, onClose }: DayDetailPopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null)
+  const confirmDelete = useDeleteEvent(onDelete)
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -56,9 +58,7 @@ export default function DayDetailPopover({ day, monthIndex, events, onDelete, on
               </span>
               <button
                 className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                onClick={() => {
-                  if (confirm(`Delete "${evt.title}"?`)) onDelete(evt.id)
-                }}
+                onClick={() => confirmDelete(evt)}
               >
                 <span className="material-symbols-outlined text-sm">delete</span>
               </button>

@@ -1,15 +1,38 @@
 import { useState, useRef, useCallback } from 'react'
+import type { CalendarEvent } from './types'
 import Header from './components/Header'
 import CalendarGrid from './components/CalendarGrid'
 import Footer from './components/Footer'
 import EventModal from './components/EventModal'
 import { useEvents } from './hooks/useEvents'
+import { useDeleteEvent } from './hooks/useDeleteEvent'
 
 export default function App() {
-  const { events, addEvent, deleteEvent, storageMode, fileName, fsSupported, connectFile, createFile, disconnectFile, downloadEvents } =
+  const { events, addEvent, deleteEvent, updateEvent, storageMode, fileName, fsSupported, connectFile, createFile, disconnectFile, downloadEvents } =
     useEvents()
-  const [modalOpen, setModalOpen] = useState(false)
+  const [newModalOpen, setNewModalOpen] = useState(false)
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null)
   const calendarRef = useRef<HTMLDivElement>(null)
+
+  const modalOpen = newModalOpen || editingEvent !== null
+
+  const handleModalClose = useCallback(() => {
+    setNewModalOpen(false)
+    setEditingEvent(null)
+  }, [])
+
+  const handleModalSubmit = useCallback(
+    (data: { title: string; start: string; end: string; color: string }) => {
+      if (editingEvent) {
+        updateEvent(editingEvent.id, data)
+      } else {
+        addEvent(data)
+      }
+    },
+    [editingEvent, updateEvent, addEvent],
+  )
+
+  const confirmDelete = useDeleteEvent(deleteEvent)
 
   const handleTodayClick = useCallback(() => {
     const todayCell = document.getElementById('cell-today')
@@ -24,8 +47,8 @@ export default function App() {
 
   return (
     <div className="bg-white text-gray-800 h-screen flex flex-col font-sans antialiased">
-      <Header onTodayClick={handleTodayClick} onAddEvent={() => setModalOpen(true)} />
-      <CalendarGrid ref={calendarRef} events={events} onDeleteEvent={deleteEvent} />
+      <Header onTodayClick={handleTodayClick} onAddEvent={() => setNewModalOpen(true)} />
+      <CalendarGrid ref={calendarRef} events={events} onDeleteEvent={deleteEvent} onEditEvent={setEditingEvent} />
       <Footer
         storageMode={storageMode}
         fileName={fileName}
@@ -35,7 +58,13 @@ export default function App() {
         onDisconnectFile={disconnectFile}
         onDownloadEvents={downloadEvents}
       />
-      <EventModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSubmit={addEvent} />
+      <EventModal
+        isOpen={modalOpen}
+        onClose={handleModalClose}
+        onSubmit={handleModalSubmit}
+        editingEvent={editingEvent}
+        onDelete={confirmDelete}
+      />
     </div>
   )
 }

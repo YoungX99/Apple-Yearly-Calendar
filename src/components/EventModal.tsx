@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
+import type { CalendarEvent } from '../types'
 import { COLORS } from '../constants'
 
 interface EventModalProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (data: { title: string; start: string; end: string; color: string }) => void
+  editingEvent?: CalendarEvent | null
+  onDelete?: (event: CalendarEvent) => void
 }
 
-export default function EventModal({ isOpen, onClose, onSubmit }: EventModalProps) {
+export default function EventModal({ isOpen, onClose, onSubmit, editingEvent, onDelete }: EventModalProps) {
   const [title, setTitle] = useState('')
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')
@@ -15,13 +18,22 @@ export default function EventModal({ isOpen, onClose, onSubmit }: EventModalProp
   const [visible, setVisible] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
 
+  const isEditMode = !!editingEvent
+
   useEffect(() => {
     if (isOpen) {
-      const todayStr = new Date().toISOString().split('T')[0]
-      setStart(todayStr)
-      setEnd(todayStr)
-      setTitle('')
-      setColor('red')
+      if (editingEvent) {
+        setTitle(editingEvent.title)
+        setStart(editingEvent.start)
+        setEnd(editingEvent.end)
+        setColor(editingEvent.color)
+      } else {
+        const todayStr = new Date().toISOString().split('T')[0]
+        setStart(todayStr)
+        setEnd(todayStr)
+        setTitle('')
+        setColor('red')
+      }
       setTimeout(() => {
         setVisible(true)
         titleRef.current?.focus()
@@ -29,7 +41,7 @@ export default function EventModal({ isOpen, onClose, onSubmit }: EventModalProp
     } else {
       setVisible(false)
     }
-  }, [isOpen])
+  }, [isOpen, editingEvent])
 
   if (!isOpen) return null
 
@@ -47,6 +59,13 @@ export default function EventModal({ isOpen, onClose, onSubmit }: EventModalProp
     if (e.target === e.currentTarget) onClose()
   }
 
+  const handleDelete = () => {
+    if (editingEvent && onDelete) {
+      onDelete(editingEvent)
+      onClose()
+    }
+  }
+
   return (
     <div
       className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center transition-opacity duration-200 ${visible ? 'opacity-100' : 'opacity-0'}`}
@@ -56,10 +75,18 @@ export default function EventModal({ isOpen, onClose, onSubmit }: EventModalProp
         className={`bg-white rounded-xl shadow-2xl w-[400px] overflow-hidden transform transition-transform duration-200 ${visible ? 'scale-100' : 'scale-95'}`}
       >
         <div className="px-4 py-3 border-b border-ios-border flex justify-between items-center bg-gray-50/50">
-          <h3 className="text-sm font-semibold text-gray-900">New Event</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <span className="material-symbols-outlined text-xl">close</span>
-          </button>
+          <h3 className="text-sm font-semibold text-gray-900">
+            {isEditMode ? 'Edit Event' : 'New Event'}
+          </h3>
+          {isEditMode ? (
+            <button onClick={handleDelete} className="text-red-400 hover:text-red-600 transition-colors">
+              <span className="material-symbols-outlined text-xl">delete</span>
+            </button>
+          ) : (
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <span className="material-symbols-outlined text-xl">close</span>
+            </button>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -132,7 +159,7 @@ export default function EventModal({ isOpen, onClose, onSubmit }: EventModalProp
               type="submit"
               className="px-4 py-1.5 text-sm font-medium text-white bg-gray-900 hover:bg-black rounded-md shadow-sm transition"
             >
-              Add Event
+              {isEditMode ? 'Save' : 'Add Event'}
             </button>
           </div>
         </form>
